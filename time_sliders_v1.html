@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!-- Abbey Roelofs, University of Michigan
+July 2021 -->
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title>TimeSlider widget | Sample | ArcGIS API for JavaScript 4.18</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css"/>
+    <script src="https://js.arcgis.com/4.18/"></script>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #timeSlider {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 20px;
+        }
+
+        #titleDiv {
+            padding: 10px;
+            font-weight: 36;
+            text-align: center;
+        }
+    </style>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/TimeSlider",
+            "esri/widgets/Expand",
+            "esri/widgets/Legend"
+        ], function (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) {
+
+            /* TODO: Define your variables here as described. */
+            // Define the center and zoom level of your map.
+            const mapCtr = [22.88, 37.905];
+            const mapZoom = 18;
+            // The field/column in the feature layer that contains the scaled start date (if using a date range) or
+            // the scaled date (if using a single date field).
+            const scaledDateField1 = "ScaledEarliestDate";
+            // The field/column in the feature layer that contains the scaled end date, if using a date range.
+            // If using a single date field, ignore this.
+            const scaledDateField2 = "ScaledLatestDate";
+            // The url of the feature layer on ArcGIS Online
+            const layerURL = "https://services1.arcgis.com/4ezfu5dIwH83BUNL/arcgis/rest/services/TimeScalesCorinthExample/FeatureServer"
+            // Copy the scaleFactor and offset values from the python notebook here.
+            const scaleFactor = 0.0989;
+            const offset = 1971.7254;
+            /* This array defines where the tick marks will be on the time slider.
+            The sample data goes from 497 BCE to 790 CE, so the tick marks here start at -500 and end at 800, with
+            some spaced in between as well.
+             Note that these may not come out exactly as intended due to the loss of date resolution mentioned
+             in the notebook file--it might take some experimentation or additional calculation with the scaled
+             range to get these exactly where you want them. */
+            const tickLocs = [-750, -500, -250, 0, 250, 500, 750, 1000, 1250, 1500, 1750];
+           /* Update the following function to define how your dates should be displayed. The return value (dispYear)
+            should be the string that will be displayed for a given input date value.
+            In the example code shown below, years below zero will be displayed as '#### BCE', while years 0 or higher
+            will be displayed as '#### CE'.
+            (Note that this is doing the reverse of the scaling function
+            in the python notebook to arrive back at the original year.)*/
+            function formatYearString(displayYear) {
+                // Note that this returns the display string, not a date object.
+                if (displayYear < 0) {
+                    displayYear = -displayYear.toString() + "BCE";
+                } else {
+                    displayYear = displayYear.toString() + "CE";
+                }
+                return displayYear;
+            }
+            /* Changes from here on should be unnecessary, unless you want to do further customization. */
+
+            const layer = new FeatureLayer({
+                url: layerURL
+            });
+
+            const map = new Map({
+                basemap: "hybrid",
+                layers: [layer]
+            });
+
+            const view = new MapView({
+                map: map,
+                container: "viewDiv",
+                zoom: mapZoom,
+                center: mapCtr
+            });
+
+            // Calculate the tick locations relative to the scaled dates
+            let scaledTickLocs = [];
+            tickLocs.forEach(tick => {
+                console.log(tick);
+                let scaledTick = new Date(tick * scaleFactor + offset, 1, 1)
+                scaledTickLocs.push(scaledTick);
+                console.log(scaledTick);
+            });
+            function scaleDate(dateIn) {
+                // Note that this returns the display string, not a date object.
+                let dispDate = new Date(dateIn);
+                let dispYear = dispDate.getUTCFullYear();
+                dispYear = Math.round((dispYear - offset) / scaleFactor);
+                dispYear = formatYearString(dispYear);
+                return dispYear;
+            }
+            // time slider widget initialization
+            const timeSlider = new TimeSlider({
+                container: "timeSlider",
+                view: view,
+                timeVisible: false, // don't show the time stamps on the timeslider
+                loop: true,
+                // This section formats the min year, max year, and extent displays
+                // The function is called for each of the elements (min, max, extents), with the 'type' value set to
+                // one of these
+                labelFormatFunction: (value, type, element, layout) => {
+                    // See help here: https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-TimeSlider.html#labelFormatFunction
+                    if (!value) {
+                        // console.log("no value found for " + type);
+                        return
+                    }
+                    // console.log(type);
+                    // console.log(value);
+                    switch (type) {
+                        case "min":
+                        case "max":
+                            let dispYear = scaleDate(value);
+                            element.innerText = dispYear;
+                            // Note that you can also include something like the following to do custom formatting
+                            //element.setAttribute("style", "font-family: 'Orbitron', sans-serif; font-size: 16px; color: magenta;");
+                            break;
+                        case "extent":
+                            let dispYear1 = scaleDate(value[0]);
+                            let dispYear2 = scaleDate(value[1]);
+                            // console.log(dispYear1 + " - " + dispYear2);
+                            element.innerText = dispYear1 + " - " + dispYear2;
+                            break;
+                    }
+                },
+                tickConfigs: [{
+                    // This values list could be generated by a function insted of hard-coded here
+                    // Include a section at the top where the user could enter the dates they want the ticks at (in
+                    // un-scaled units).
+                    mode: "position",
+                    values: scaledTickLocs.map((date) => date.getTime()),
+                    labelsVisible: true,
+                    labelFormatFunction: (value) => {
+                        // This section formats the dates displayed for the tickmarks (as defined above)
+                        console.log(new Date(value).getUTCFullYear());
+                        let dispYear = scaleDate(value);
+                        console.log(dispYear);
+                        return `${dispYear}`;
+                    },
+                    /*tickCreatedFunction: (value, tickElement, labelElement) => {
+                        tickElement.classList.add("custom-ticks");
+                        labelElement.classList.add("custom-labels");
+                    }*/
+                }],
+            });
+
+            // add the UI for a title
+            view.ui.add("titleDiv", "top-right");
+
+            view.whenLayerView(layer).then(function (lv) {
+                // Round up the full time extent to full hour
+                timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
+            });
+            const legend = new Legend({
+                view: view
+            });
+            const legendExpand = new Expand({
+                expandIconClass: "esri-icon-legend",
+                expandTooltip: "Legend",
+                view: view,
+                content: legend,
+                expanded: false
+            });
+            view.ui.add(legendExpand, "top-left");
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+<div id="timeSlider"></div>
+<div id="titleDiv" class="esri-widget">
+    <div id="titleText">Date Scaling on Time Sliders</div>
+</div>
+</body>
+
+</html>
