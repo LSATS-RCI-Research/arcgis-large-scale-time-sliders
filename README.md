@@ -16,6 +16,6 @@ your use case. To publish, load the file on your server of choice.
 
 You can see the completed example map [here](https://aheinlei.lsait.lsa.umich.edu/time_slider_map/time_sliders_v1.html).
 
-Abbey Roelofs, aheinlei@umich.edu
+Developed by Abbey Roelofs, aheinlei@umich.edu
 
 University of Michigan, June 2021
