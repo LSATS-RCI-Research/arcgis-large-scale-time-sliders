@@ -80,10 +80,31 @@ July 2021 -->
                 }
                 return displayYear;
             }
+
+            // Define a popup template for the layer.
+            const template = {
+                title: "{Structure}",
+                content: [
+                    {
+                        type: "fields",
+                        fieldInfos: [
+                            {
+                                fieldName: "ChronEarly",
+                                label: "Earliest Date"
+                            },
+                            {
+                                fieldName: "ChronLate",
+                                label: "Latest Date"
+                            }
+                        ]
+                    }
+                ]
+            };
             /* Changes from here on should be unnecessary, unless you want to do further customization. */
 
             const layer = new FeatureLayer({
-                url: layerURL
+                url: layerURL,
+                popupTemplate: template
             });
 
             const map = new Map({
