@@ -14,6 +14,8 @@ the variables in the code as described and run the entire notebook to generate a
 Edit the html file to refer to this newly created layer, and update the variables in the html file as described for 
 your use case. To publish, load the file on your server of choice.
 
+You can see the completed example map [here](https://aheinlei.lsait.lsa.umich.edu/time_slider_map/time_sliders_v1.html).
+
 Abbey Roelofs, aheinlei@umich.edu
 
 University of Michigan, June 2021
