@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <!-- Abbey Roelofs, University of Michigan
-July 2021 -->
+July 2021
+Based on Esri Time Slider widget sample code found here:
+https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
+-->
 <html>
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport"
           content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
-    <title>TimeSlider widget | Sample | ArcGIS API for JavaScript 4.18</title>
+    <title>Custom TimeSlider Example</title>
     <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css"/>
     <script src="https://js.arcgis.com/4.18/"></script>
 
@@ -40,8 +43,11 @@ July 2021 -->
             "esri/layers/FeatureLayer",
             "esri/widgets/TimeSlider",
             "esri/widgets/Expand",
-            "esri/widgets/Legend"
-        ], function (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend) {
+            "esri/widgets/Legend",
+            "esri/widgets/Home",
+            "esri/widgets/BasemapGallery",
+            "esri/Basemap"
+        ], function (Map, MapView, FeatureLayer, TimeSlider, Expand, Legend, Home, BasemapGallery, Basemap) {
 
             /* TODO: Define your variables here as described. */
             // Define the center and zoom level of your map.
@@ -100,7 +106,10 @@ July 2021 -->
                     }
                 ]
             };
-            /* Changes from here on should be unnecessary, unless you want to do further customization. */
+            /* This is a very basic web map. If that's what you're after, no changes after this point
+            * should be necessary.
+            *
+            * If you want to further customize the map, do so below. */
 
             const layer = new FeatureLayer({
                 url: layerURL,
@@ -117,6 +126,14 @@ July 2021 -->
                 container: "viewDiv",
                 zoom: mapZoom,
                 center: mapCtr
+            });
+
+            let homeBtn = new Home({
+                view: view
+            });
+            let basemapGallery = new BasemapGallery({
+                view: view,
+                source: [Basemap.fromId('satellite'), Basemap.fromId('gray'), Basemap.fromId('streets')]
             });
 
             // Calculate the tick locations relative to the scaled dates
@@ -191,7 +208,8 @@ July 2021 -->
 
             // add the UI for a title
             view.ui.add("titleDiv", "top-right");
-
+            //view.ui.add(basemapGallery, "top-right");
+            view.ui.add(homeBtn, "top-left");
             view.whenLayerView(layer).then(function (lv) {
                 // Round up the full time extent to full hour
                 timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
@@ -199,6 +217,13 @@ July 2021 -->
             const legend = new Legend({
                 view: view
             });
+            const basemapExpand = new Expand({
+                expandIconClass: "esri-icon-basemap",
+                expandTooltip: "Basemap",
+                view: view,
+                content: basemapGallery,
+                expanded: false
+            })
             const legendExpand = new Expand({
                 expandIconClass: "esri-icon-legend",
                 expandTooltip: "Legend",
@@ -207,6 +232,7 @@ July 2021 -->
                 expanded: false
             });
             view.ui.add(legendExpand, "top-left");
+            view.ui.add(basemapExpand, "top-left");
         });
     </script>
 </head>
