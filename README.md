@@ -17,7 +17,7 @@ the variables in the code as described and run the entire notebook to generate a
 Edit the [time_sliders_v1.html file](https://gitlab.umich.edu/lsa-ts-gis-team/arcgis-large-scale-time-sliders/-/blob/main/time_sliders_v1.html) to refer to this newly created layer, and update the variables in the html file as described for 
 your use case. To publish, load the file on your server or hosting platform of choice.
 
-The data used in this example is a subset of the [ASCSA Corinth Excavation data](https://www.arcgis.com/home/item.html?id=f5e717c8341347a5b773d9c5e3512fdf). 
+The data used in this example is a subset of the [ASCSA Corinth Excavation data](https://www.arcgis.com/home/item.html?id=f5e717c8341347a5b773d9c5e3512fdf). I'm not an archaeologist or historian and chose this dataset only for its span of date ranges, so I make no claims about the accuracy of this data--it's intended for illustration purposes only.
 
 ----
 Developed by Abbey Roelofs
