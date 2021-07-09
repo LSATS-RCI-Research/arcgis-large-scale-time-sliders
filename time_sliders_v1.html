@@ -9,7 +9,7 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
     <meta charset="utf-8"/>
     <meta name="viewport"
           content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
-    <title>Custom TimeSlider Example</title>
+    <title>Historical TimeSlider Example</title>
     <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css"/>
     <script src="https://js.arcgis.com/4.18/"></script>
 
@@ -106,8 +106,13 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
                     }
                 ]
             };
+
+            /* If your data layer(s) include any extra attributions to be added to the footer of the map,
+             list them here. Otherwise delete this line.*/
+            let additionalAttribution = ", ASCSA Corinth Excavations"
+
             /* This is a very basic web map. If that's what you're after, no changes after this point
-            * should be necessary.
+            * should be necessary, other than changing the title in the fourth-to-last line of code in this file.
             *
             * If you want to further customize the map, do so below. */
 
@@ -139,10 +144,11 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
             // Calculate the tick locations relative to the scaled dates
             let scaledTickLocs = [];
             tickLocs.forEach(tick => {
-                console.log(tick);
+                // The console.log statements below can be uncommented to help in debugging the calculation.
+                //console.log(tick);
                 let scaledTick = new Date(tick * scaleFactor + offset, 1, 1)
                 scaledTickLocs.push(scaledTick);
-                console.log(scaledTick);
+                //console.log(scaledTick);
             });
             function scaleDate(dateIn) {
                 // Note that this returns the display string, not a date object.
@@ -194,9 +200,10 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
                     labelsVisible: true,
                     labelFormatFunction: (value) => {
                         // This section formats the dates displayed for the tickmarks (as defined above)
-                        console.log(new Date(value).getUTCFullYear());
+                        // The console.log statements may be useful in debugging the display dates.
+                        //console.log(new Date(value).getUTCFullYear());
                         let dispYear = scaleDate(value);
-                        console.log(dispYear);
+                        //console.log(dispYear);
                         return `${dispYear}`;
                     },
                     /*tickCreatedFunction: (value, tickElement, labelElement) => {
@@ -213,6 +220,11 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
             view.whenLayerView(layer).then(function (lv) {
                 // Round up the full time extent to full hour
                 timeSlider.fullTimeExtent = layer.timeInfo.fullTimeExtent.expandTo("hours");
+                // This is the only way I could find to update the existing attribution list.
+                if(additionalAttribution) {
+                    let attr = document.getElementsByClassName("esri-attribution__sources")[0]
+                    attr.innerText += additionalAttribution;
+                }
             });
             const legend = new Legend({
                 view: view
@@ -241,8 +253,7 @@ https://developers.arcgis.com/javascript/latest/sample-code/widgets-timeslider
 <div id="viewDiv"></div>
 <div id="timeSlider"></div>
 <div id="titleDiv" class="esri-widget">
-    <div id="titleText">Date Scaling on Time Sliders</div>
+    <div id="titleText">TimeSlider Widget for Historical Time Scales</div>
 </div>
 </body>
-
 </html>
